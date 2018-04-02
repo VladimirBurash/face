@@ -4,18 +4,17 @@ import json
 
 import numpy
 from PIL import Image
-from skimage import io
-
 import numpy as np
+from datetime import datetime
 from django.utils.decorators import method_decorator
 from django.views import View
 from django.views.decorators.csrf import csrf_exempt
 from scipy.spatial import distance
 
 from app import DETECTOR, SP, FACEREC
-from app.models import Person
-from app.utils import get_descriptor
+from app.models import Person, History
 import io as ios
+
 
 class BadRequest(Exception):
     pass
@@ -24,6 +23,7 @@ class BadRequest(Exception):
 @method_decorator(csrf_exempt, name='dispatch')
 class CheckImage(View):
     def post(self, request):
+        shape = None
         try:
             data = json.loads(request.body.decode('utf-8')).get('data').split(',')[1]
         except:
@@ -42,6 +42,10 @@ class CheckImage(View):
                     p_desc = np.fromstring(p.descriptor, sep='\n')
                     a = distance.euclidean(desc, p_desc)
                     if a < 0.5:
+                        History(
+                            person=p,
+                            time=datetime.now()
+                        ).save()
                         return {
                             'person': p.name,
                         }

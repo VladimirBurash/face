@@ -17,6 +17,8 @@ class Person(Model):
     photo = models.ImageField(upload_to='images', default=None, verbose_name='Фото')
     descriptor = models.TextField(null=True, blank=True, default=None, verbose_name='Дескриптор')
 
+    def __str__(self):
+        return self.name
     def save(self, *args, **kwargs):
         image = self.photo
         desc = get_descriptor(image.file)
@@ -34,3 +36,6 @@ class History(Model):
 
     person = models.ForeignKey(Person, on_delete=models.CASCADE, verbose_name='Посетитель')
     time = models.DateTimeField(verbose_name='Время прихода')
+
+    def __str__(self):
+        return self.person.name
